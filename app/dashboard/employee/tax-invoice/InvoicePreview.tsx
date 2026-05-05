@@ -146,14 +146,13 @@ function CompactHeader({
   return (
     <div style={{ borderBottom: "2px solid #b0b8d0", padding: "8px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <div style={{ width: "36px", height: "36px", border: "1.5px solid #7090c8", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#e8f0fe,#c8d8f8)", flexShrink: 0 }}>
-          <span style={{ fontSize: "13px", fontWeight: "900", color: "#6030a0", fontFamily: "Arial Black, sans-serif" }}>I</span>
-          <span style={{ fontSize: "13px", fontWeight: "900", color: "#3060c0", fontFamily: "Arial Black, sans-serif" }}>M</span>
+        <div style={{ width: "36px", height: "36px", border: "1.5px solid #7030a0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#f3e8ff,#e0c8f8)", flexShrink: 0 }}>
+          <span style={{ fontSize: "13px", fontWeight: "900", color: "#6030a0", fontFamily: "Arial Black, sans-serif" }}>SS</span>
         </div>
         <div>
           <div style={{ fontSize: "14px", fontWeight: "900", letterSpacing: "3px", fontFamily: "Arial Black, sans-serif" }}>
-            <span style={{ color: "#6030a0" }}>IRUKA</span>&nbsp;
-            <span style={{ color: "#3060c0" }}>MOTORS</span>
+            <span style={{ color: "#6030a0" }}>SWIN</span>&nbsp;
+            <span style={{ color: "#6030a0" }}>SUPPLIERS</span>
           </div>
           <div style={{ fontSize: "9px", color: labelColor }}>
             Tax Invoice No: <strong style={{ color: "#1a2540" }}>{invoiceNo}</strong>
@@ -173,32 +172,28 @@ function FullLetterhead() {
   return (
     <div style={{ borderBottom: "2px solid #b0b8d0", flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "14px 20px 12px" }}>
-        <div style={{ width: "78px", height: "78px", border: "2px solid #7090c8", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "linear-gradient(135deg,#e8f0fe 0%,#c8d8f8 100%)" }}>
+        <div style={{ width: "78px", height: "78px", border: "2px solid #7030a0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "linear-gradient(135deg,#f3e8ff 0%,#e0c8f8 100%)" }}>
           <div style={{ textAlign: "center", lineHeight: 1 }}>
-            <span style={{ fontSize: "30px", fontWeight: "900", color: "#6030a0", fontFamily: "Arial Black, sans-serif" }}>I</span>
-            <span style={{ fontSize: "30px", fontWeight: "900", color: "#3060c0", fontFamily: "Arial Black, sans-serif" }}>M</span>
-            <div style={{ width: "9px", height: "9px", background: "#6030a0", borderRadius: "50%", marginLeft: "auto", marginTop: "-4px" }} />
+            <span style={{ fontSize: "28px", fontWeight: "900", color: "#6030a0", fontFamily: "Arial Black, sans-serif" }}>SS</span>
           </div>
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
           <h1 style={{ fontSize: "30px", fontWeight: "900", letterSpacing: "6px", margin: 0, fontFamily: "Arial Black, sans-serif", textAlign: "center", lineHeight: 1 }}>
-            <span style={{ color: "#6030a0" }}>IRUKA</span>
-            <span style={{ color: "#b0b8d0" }}>&nbsp;&nbsp;</span>
-            <span style={{ color: "#3060c0" }}>MOTORS</span>
+            <span style={{ color: "#6030a0" }}>SWIN SUPPLIERS</span>
           </h1>
           <div style={{ height: "1px", background: "#d0d8ec", width: "100%" }} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px 0", fontSize: "11px", color: "#3a4560" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#7090c8", fontWeight: "700" }}>📍</span> NO : A/G/9</span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#7090c8", fontWeight: "700" }}>📍</span> Sri Sangaraja Mawatha</span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#7090c8", fontWeight: "700" }}>📍</span> Colombo - 10</span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#3060c0", fontWeight: "700" }}>📞</span> 071-3283005</span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#3060c0", fontWeight: "700" }}>✉</span> irukamotors@gmail.com</span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#6030a0", fontWeight: "700" }}>✒️</span>VAT No:108995203-7000</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#7030a0", fontWeight: "700" }}>📍</span> NO : 122/1/12</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#7030a0", fontWeight: "700" }}>📍</span> Sri Sangaraja Mawatha</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#7030a0", fontWeight: "700" }}>📍</span> Colombo – 10</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#6030a0", fontWeight: "700" }}>📞</span> 071-3283005</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#6030a0", fontWeight: "700" }}>📞</span> 077-1603968</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: "#6030a0", fontWeight: "700" }}>✉</span> swinsuppliers@gmail.com</span>
           </div>
         </div>
       </div>
-      <div style={{ background: "#e8eef8", padding: "5px 20px", fontSize: "9.5px", color: "#3a4560", textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderTop: "1px solid #d0d8ec" }}>
-        Supply of Motor Vehicle Spare Parts &amp; Service to Government Offices (Strong &amp; Supplying)
+      <div style={{ background: "#f3e8ff", padding: "5px 20px", fontSize: "9.5px", color: "#3a2060", textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderTop: "1px solid #d0b8f0" }}>
+        Supply of Motor Vehicle Spare Parts &amp; Service to Government Office (Strong &amp; Supplying)
       </div>
     </div>
   );
@@ -237,7 +232,7 @@ function InvoicePage({
 
 
 /** Signature block — shown on every page */
-function SignatureBlock() {
+function SignatureBlock({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) {
   return (
     <div style={{ paddingTop: "84px" }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", padding: "0 24px" }}>
@@ -247,9 +242,12 @@ function SignatureBlock() {
           </div>
         ))}
       </div>
-      <div style={{ textAlign: "center", marginTop: "4px", paddingTop: "2px", borderTop: "1px solid #c0cce0" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px", paddingTop: "2px", borderTop: "1px solid #c0cce0" }}>
         <p style={{ fontSize: "8.5px", color: "#8090b0", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
-          This is a computer-generated tax invoice — Swin Suppliers, Colombo 10 — irukamotors@gmail.com
+          This is a computer-generated tax invoice — Swin Suppliers, Colombo 10 — swinsuppliers@gmail.com
+        </p>
+        <p style={{ fontSize: "8.5px", color: "#8090b0", fontWeight: "700", letterSpacing: "0.5px", margin: 0, whiteSpace: "nowrap" }}>
+          Page {pageNumber} of {totalPages}
         </p>
       </div>
     </div>
@@ -374,7 +372,7 @@ function ExtraSheetPages({
             {/* Body */}
             <div style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", padding: isFirst ? "12px 20px 4px" : shiftUpForLongInvoice ? "10px 20px 0" : "24px 20px 2px", overflow: "hidden" }}>
               {isFirst && (
-                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", fontSize: "160px", fontWeight: "900", color: "rgba(100,120,180,0.05)", fontFamily: "Arial Black, sans-serif", pointerEvents: "none", whiteSpace: "nowrap", zIndex: 0, letterSpacing: "-8px" }}>IM.</div>
+                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%) rotate(-35deg)", fontSize: "80px", fontWeight: "900", color: "rgba(107,33,168,0.055)", fontFamily: "Arial Black, sans-serif", pointerEvents: "none", whiteSpace: "nowrap", zIndex: 0, letterSpacing: "8px" }}>SWIN SUPPLIERS</div>
               )}
 
               <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column" }}>
@@ -478,7 +476,7 @@ function ExtraSheetPages({
                   </>
                 )}
 
-                <SignatureBlock />
+                <SignatureBlock pageNumber={pageIdx + 1} totalPages={total} />
               </div>
             </div>
           </InvoicePage>
@@ -580,7 +578,7 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
             {/* Body */}
             <div style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", padding: isFirst ? "12px 20px 4px" : hasExtra && totalPages > 2 ? "10px 20px 0" : "24px 20px 2px", overflow: "hidden" }}>
               {isFirst && (
-                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", fontSize: "160px", fontWeight: "900", color: "rgba(100,120,180,0.05)", fontFamily: "Arial Black, sans-serif", pointerEvents: "none", whiteSpace: "nowrap", zIndex: 0, letterSpacing: "-8px" }}>IM.</div>
+                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%) rotate(-35deg)", fontSize: "80px", fontWeight: "900", color: "rgba(107,33,168,0.055)", fontFamily: "Arial Black, sans-serif", pointerEvents: "none", whiteSpace: "nowrap", zIndex: 0, letterSpacing: "8px" }}>SWIN SUPPLIERS</div>
               )}
 
               <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column" }}>
@@ -684,7 +682,7 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
                   </>
                 )}
 
-                <SignatureBlock />
+                <SignatureBlock pageNumber={pageIdx + 1} totalPages={totalPages} />
               </div>
             </div>
           </InvoicePage>
