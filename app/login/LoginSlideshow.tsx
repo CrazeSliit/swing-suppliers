@@ -56,20 +56,8 @@ export default function LoginSlideshow() {
 
       {/* Top: brand */}
       <div className="relative z-10 px-10 pt-10 flex items-center gap-3">
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            border: "1.5px solid rgba(255,255,255,0.3)",
-            borderRadius: 8,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(255,255,255,0.1)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <span style={{ fontSize: 15, fontWeight: 900, color: "#fff", fontFamily: '"Arial Black", sans-serif', letterSpacing: -1 }}>
+        <div className="w-10 h-10 rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm flex items-center justify-center shrink-0">
+          <span className="text-white font-black text-sm" style={{ fontFamily: '"Arial Black", sans-serif', letterSpacing: -1 }}>
             SS
           </span>
         </div>
@@ -98,8 +86,7 @@ export default function LoginSlideshow() {
             <button
               key={i}
               onClick={() => { setFading(true); setTimeout(() => { setCurrent(i); setFading(false); }, 600); }}
-              className="w-2 h-2 rounded-full transition-all duration-300"
-              style={{ background: i === current ? "#fff" : "rgba(255,255,255,0.3)" }}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${i === current ? "bg-white scale-110" : "bg-white/30"}`}
               aria-label={`Go to slide ${i + 1}`}
             />
           ))}
