@@ -19,9 +19,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Iruka Motors — Premium Motorcycles & Services",
+  title: "Swin Suppliers — Premium Motorcycles & Services",
   description:
-    "Iruka Motors — your trusted destination for new & used motorcycles, expert servicing, and genuine parts.",
+    "Swin Suppliers — your trusted destination for new & used motorcycles, expert servicing, and genuine parts.",
 };
 
 export default function RootLayout({

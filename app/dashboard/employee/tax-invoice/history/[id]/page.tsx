@@ -5,7 +5,7 @@ import { getSession } from "@/lib/session";
 import InvoicePreview from "../../InvoicePreview";
 import { InvoiceData } from "@/lib/invoice-types";
 
-export const metadata = { title: "Tax Invoice Details — Iruka Motors" };
+export const metadata = { title: "Tax Invoice Details — Swin Suppliers" };
 
 export default async function TaxInvoiceHistoryItemPage({
   params,

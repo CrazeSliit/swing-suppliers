@@ -11,7 +11,7 @@ import InvoicePaidToggle from "./InvoicePaidToggle";
 import InvoiceFilters from "./InvoiceFilters";
 import ExportButton from "./ExportButton";
 
-export const metadata = { title: "Tax Invoice History — Iruka Motors" };
+export const metadata = { title: "Tax Invoice History — Swin Suppliers" };
 
 const PAGE_SIZE = 25;
 

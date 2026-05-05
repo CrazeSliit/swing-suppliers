@@ -110,7 +110,7 @@ export default function EmployeeSidebar({ name }: { name: string }) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-sidebar-foreground leading-tight tracking-tight truncate">
-              Iruka Motors
+              Swin Suppliers
             </p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />

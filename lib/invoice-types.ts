@@ -35,7 +35,7 @@ export const defaultInvoiceData: InvoiceData = {
   invoiceDate: new Date().toISOString().split("T")[0],
   taxInvoiceNo: "",
   supplierTIN: "108995203",
-  supplierName: "IRUKA MOTORS",
+  supplierName: "Swin Suppliers",
   supplierAddress: "NO: A/G/9, Sri Sangaraja Mawatha, Colombo - 10",
   supplierTel: "071-3283005 / 077-1603968",
   purchaserTIN: "",

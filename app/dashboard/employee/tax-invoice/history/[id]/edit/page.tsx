@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 import { getTaxInvoiceById } from "@/app/actions/tax-invoice";
 import EditInvoiceClient from "./EditInvoiceClient";
 
-export const metadata = { title: "Edit Tax Invoice - Iruka Motors" };
+export const metadata = { title: "Edit Tax Invoice - Swin Suppliers" };
 
 export default async function EditTaxInvoicePage({
   params,

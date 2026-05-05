@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 import prisma from "@/lib/db";
 import Greeting from "@/components/ui/Greeting";
 
-export const metadata = { title: "Dashboard — Iruka Motors" };
+export const metadata = { title: "Dashboard — Swin Suppliers" };
 
 const departmentLabels: Record<string, string> = {
   SALES: "Sales",

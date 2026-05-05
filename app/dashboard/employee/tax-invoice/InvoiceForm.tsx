@@ -472,7 +472,7 @@ export default function InvoiceForm({ data, onChange }: Props) {
               </div>
               <div style={{ textAlign: "center", marginTop: "14px", paddingTop: "8px", borderTop: "1px solid #c0cce0" }}>
                 <p style={{ fontSize: "8.5px", color: "#8090b0", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
-                  This is a computer-generated tax invoice — Iruka Motors, Colombo 10 — irukamotors@gmail.com
+                  This is a computer-generated tax invoice — Swin Suppliers, Colombo 10 — irukamotors@gmail.com
                 </p>
               </div>
             </div>
@@ -789,7 +789,7 @@ function ExtraSheetForm({
             </div>
             <div style={{ textAlign: "center", marginTop: "14px", paddingTop: "8px", borderTop: "1px solid #c0cce0" }}>
               <p style={{ fontSize: "8.5px", color: "#8090b0", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
-                This is a computer-generated tax invoice — Iruka Motors, Colombo 10 — irukamotors@gmail.com
+                This is a computer-generated tax invoice — Swin Suppliers, Colombo 10 — irukamotors@gmail.com
               </p>
             </div>
           </div>

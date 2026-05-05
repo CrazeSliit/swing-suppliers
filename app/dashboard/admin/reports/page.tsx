@@ -8,7 +8,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import ReportFilters from "./ReportFilters";
 import ExportButton from "./ExportButton";
 
-export const metadata = { title: "Reports - Tax Invoice History - Iruka Motors" };
+export const metadata = { title: "Reports - Tax Invoice History - Swin Suppliers" };
 
 function formatCurrency(amount: number) {
   return `Rs. ${amount.toLocaleString("en-LK", {

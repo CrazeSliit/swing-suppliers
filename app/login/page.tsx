@@ -1,7 +1,7 @@
 import LoginForm from "./LoginForm";
 
 export const metadata = {
-  title: "Sign in — Iruka Motors",
+  title: "Sign in — Swin Suppliers",
 };
 
 export default function LoginPage() {
@@ -46,7 +46,7 @@ export default function LoginPage() {
               IM
             </span>
           </div>
-          <span className="text-white/90 text-sm font-semibold tracking-wide">Iruka Motors</span>
+          <span className="text-white/90 text-sm font-semibold tracking-wide">Swin Suppliers</span>
         </div>
 
         {/* Centre: tagline */}
@@ -65,7 +65,7 @@ export default function LoginPage() {
 
         {/* Bottom: footer note */}
         <div className="relative z-10 px-10 pb-8">
-          <p className="text-white/25 text-xs">© {new Date().getFullYear()} Iruka Motors. All rights reserved.</p>
+          <p className="text-white/25 text-xs">© {new Date().getFullYear()} Swin Suppliers. All rights reserved.</p>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ export default function LoginPage() {
           {/* Heading */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground">Welcome back</h1>
-            <p className="text-muted-foreground text-sm mt-1.5">Sign in to your Iruka Motors account</p>
+            <p className="text-muted-foreground text-sm mt-1.5">Sign in to your Swin Suppliers account</p>
           </div>
 
           <LoginForm />

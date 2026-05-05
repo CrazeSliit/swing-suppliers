@@ -4,7 +4,7 @@ import prisma from "@/lib/db";
 import ProfileForm from "./ProfileForm";
 import AvatarUpload from "./AvatarUpload";
 
-export const metadata = { title: "My Profile — Iruka Motors" };
+export const metadata = { title: "My Profile — Swin Suppliers" };
 
 const departmentLabels: Record<string, string> = {
   SALES: "Sales",
