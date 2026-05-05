@@ -32,9 +32,9 @@ export default function LoginPage() {
               }}
             >
               <div style={{ textAlign: "center", lineHeight: 1 }}>
-                <span style={{ fontSize: 24, fontWeight: 900, color: "rgb(96, 48, 160)", fontFamily: '"Arial Black", sans-serif' }}>I</span>
-                <span style={{ fontSize: 24, fontWeight: 900, color: "rgb(48, 96, 192)", fontFamily: '"Arial Black", sans-serif' }}>M</span>
-                <div style={{ width: 7, height: 7, background: "rgb(96, 48, 160)", borderRadius: "50%", marginLeft: "auto", marginTop: -3 }} />
+                <span style={{ fontSize: 24, fontWeight: 900, color: "rgb(0, 0, 0)", fontFamily: '"Arial Black", sans-serif' }}>S</span>
+                <span style={{ fontSize: 24, fontWeight: 900, color: "rgb(0, 0, 0)", fontFamily: '"Arial Black", sans-serif' }}>S</span>
+
               </div>
             </div>
           </div>
