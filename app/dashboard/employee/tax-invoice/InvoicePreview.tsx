@@ -137,11 +137,13 @@ function paginateByActualHeight<T extends { id: string }>(
 function CompactHeader({
   invoiceNo,
   invoiceDate,
-  label,
+  pageNumber,
+  totalPages,
 }: {
   invoiceNo: string;
   invoiceDate: string;
-  label: string;
+  pageNumber: number;
+  totalPages: number;
 }) {
   return (
     <div style={{ borderBottom: "2px solid #b0b8d0", padding: "8px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
@@ -161,14 +163,14 @@ function CompactHeader({
         </div>
       </div>
       <div style={{ fontSize: "10px", color: labelColor, textAlign: "right" }}>
-        <strong style={{ color: "#1a2540" }}>{label}</strong>
+        Page <strong style={{ color: "#1a2540" }}>{pageNumber}</strong> of <strong style={{ color: "#1a2540" }}>{totalPages}</strong>
       </div>
     </div>
   );
 }
 
 /** Full letterhead block */
-function FullLetterhead() {
+function FullLetterhead({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) {
   return (
     <div style={{ borderBottom: "2px solid #b0b8d0", flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "14px 20px 12px" }}>
@@ -192,8 +194,11 @@ function FullLetterhead() {
           </div>
         </div>
       </div>
-      <div style={{ background: "#f3e8ff", padding: "5px 20px", fontSize: "9.5px", color: "#3a2060", textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderTop: "1px solid #d0b8f0" }}>
-        Supply of Motor Vehicle Spare Parts &amp; Service to Government Office (Strong &amp; Supplying)
+      <div style={{ background: "#f3e8ff", padding: "5px 20px", fontSize: "9.5px", color: "#3a2060", textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderTop: "1px solid #d0b8f0", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+        <span>Supply of Motor Vehicle Spare Parts &amp; Service to Government Office (Strong &amp; Supplying)</span>
+        <span style={{ whiteSpace: "nowrap", textTransform: "none", letterSpacing: "0.5px", color: "#6030a0", fontWeight: "700" }}>
+          Page {pageNumber} of {totalPages}
+        </span>
       </div>
     </div>
   );
@@ -322,6 +327,8 @@ function ExtraSheetPages({
   combinedGrand,
   autoGrowPages = false,
   rowHeights,
+  pageOffset,
+  globalTotalPages,
 }: {
   sheet: ExtraSheet;
   sheetNumber: number;
@@ -332,6 +339,8 @@ function ExtraSheetPages({
   combinedGrand: number;
   autoGrowPages?: boolean;
   rowHeights: Map<string, number>;
+  pageOffset: number;
+  globalTotalPages: number;
 }) {
   // In preview (autoGrow) mode, never paginate — one auto-growing page per sheet.
   // In print mode, smart paginate to fit A4 pages based on heights.
@@ -347,25 +356,27 @@ function ExtraSheetPages({
         LAST_PAGE_MAX
       );
   const total = pages.length;
-      const shiftUpForLongInvoice = total > 2;
+  const shiftUpForLongInvoice = total > 2;
 
   return (
     <>
       {pages.map((pageItems, pageIdx) => {
-        const isFirst     = pageIdx === 0;
-        const isLast      = pageIdx === total - 1;
-        const isVeryLast  = isLast && isLastSheet;
-        const fillerCount = autoGrowPages ? 0 : 0; // Smart pagination dynamically fills pages, no fixed fillers used by default.
+        const isFirst          = pageIdx === 0;
+        const isLast           = pageIdx === total - 1;
+        const isVeryLast       = isLast && isLastSheet;
+        const globalPageNumber = pageOffset + pageIdx + 1;
+        const fillerCount      = 0;
 
         return (
           <InvoicePage key={pageIdx} autoGrow={autoGrowPages}>
 
             {/* Full letterhead on the first page of each sheet; compact on continuation pages */}
-            {isFirst ? <FullLetterhead /> : (
+            {isFirst ? <FullLetterhead pageNumber={globalPageNumber} totalPages={globalTotalPages} /> : (
               <CompactHeader
                 invoiceNo={data.taxInvoiceNo}
                 invoiceDate={data.invoiceDate}
-                label={`Sheet ${sheetNumber} — Page ${pageIdx + 1} of ${total}`}
+                pageNumber={globalPageNumber}
+                totalPages={globalTotalPages}
               />
             )}
 
@@ -476,7 +487,7 @@ function ExtraSheetPages({
                   </>
                 )}
 
-                <SignatureBlock pageNumber={pageIdx + 1} totalPages={total} />
+                <SignatureBlock pageNumber={globalPageNumber} totalPages={globalTotalPages} />
               </div>
             </div>
           </InvoicePage>
@@ -539,6 +550,23 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
       );
   const totalPages = pages.length;
 
+  // Paginate each extra sheet to know its page count (needed for global numbering).
+  const extraSheetPageCounts = extraSheets.map((sheet) =>
+    autoGrowPages || !isMeasured
+      ? 1
+      : paginateByActualHeight(
+          sheet.lineItems,
+          A4_PX - FIRST_FIXED,
+          A4_PX - CONT_FIXED,
+          rowHeights,
+          FIRST_PAGE_MAX,
+          CONT_PAGE_MAX,
+          LAST_PAGE_MAX
+        ).length
+  );
+  const globalTotalPages =
+    totalPages + extraSheetPageCounts.reduce((a, b) => a + b, 0);
+
   return (
     <div id="invoice-preview" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Hidden measurement container — rendered off-screen to measure individual row heights */}
@@ -567,11 +595,12 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
           <InvoicePage key={pageIdx} autoGrow={autoGrowPages}>
 
             {/* Letterhead */}
-            {isFirst ? <FullLetterhead /> : (
+            {isFirst ? <FullLetterhead pageNumber={1} totalPages={globalTotalPages} /> : (
               <CompactHeader
                 invoiceNo={data.taxInvoiceNo}
                 invoiceDate={data.invoiceDate}
-                label={`Page ${pageIdx + 1} of ${totalPages}${hasExtra ? ` · ${extraSheets.length} additional sheet${extraSheets.length > 1 ? "s" : ""}` : ""}`}
+                pageNumber={pageIdx + 1}
+                totalPages={globalTotalPages}
               />
             )}
 
@@ -682,7 +711,7 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
                   </>
                 )}
 
-                <SignatureBlock pageNumber={pageIdx + 1} totalPages={totalPages} />
+                <SignatureBlock pageNumber={pageIdx + 1} totalPages={globalTotalPages} />
               </div>
             </div>
           </InvoicePage>
@@ -690,20 +719,26 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
       })}
 
       {/* ══ EXTRA SHEETS ════════════════════════════════════ */}
-      {extraSheets.map((sheet, idx) => (
-        <ExtraSheetPages
-          key={sheet.id}
-          sheet={sheet}
-          sheetNumber={idx + 2}
-          data={data}
-          isLastSheet={idx === extraSheets.length - 1}
-          combinedExVAT={combinedExVAT}
-          combinedVAT={combinedVAT}
-          combinedGrand={combinedGrand}
-          autoGrowPages={autoGrowPages}
-          rowHeights={rowHeights}
-        />
-      ))}
+      {extraSheets.map((sheet, idx) => {
+        const pageOffset =
+          totalPages + extraSheetPageCounts.slice(0, idx).reduce((a, b) => a + b, 0);
+        return (
+          <ExtraSheetPages
+            key={sheet.id}
+            sheet={sheet}
+            sheetNumber={idx + 2}
+            data={data}
+            isLastSheet={idx === extraSheets.length - 1}
+            combinedExVAT={combinedExVAT}
+            combinedVAT={combinedVAT}
+            combinedGrand={combinedGrand}
+            autoGrowPages={autoGrowPages}
+            rowHeights={rowHeights}
+            pageOffset={pageOffset}
+            globalTotalPages={globalTotalPages}
+          />
+        );
+      })}
     </div>
   );
 }
