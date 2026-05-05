@@ -12,7 +12,7 @@ function getAppUrl(): string {
 }
 
 function getAppName(): string {
-  return process.env.APP_NAME || "Iruka Motors";
+  return process.env.APP_NAME || "Swin Suppliers";
 }
 
 function createTransporter() {
