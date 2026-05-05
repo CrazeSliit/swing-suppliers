@@ -36,7 +36,7 @@ export const defaultInvoiceData: InvoiceData = {
   taxInvoiceNo: "",
   supplierTIN: "108995203",
   supplierName: "Swin Suppliers",
-  supplierAddress: "NO: A/G/9, Sri Sangaraja Mawatha, Colombo - 10",
+  supplierAddress: "122/1/12 Sri Sangaraja Mawatha, Colombo 10",
   supplierTel: "071-3283005 / 077-1603968",
   purchaserTIN: "",
   purchaserName: "",
