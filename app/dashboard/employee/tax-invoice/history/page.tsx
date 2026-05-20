@@ -13,13 +13,26 @@ import ExportButton from "./ExportButton";
 
 export const metadata = { title: "Tax Invoice History — Swin Suppliers" };
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 20;
 
 function formatCurrency(amount: number) {
   return `Rs. ${amount.toLocaleString("en-LK", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+}
+
+type RawLineItem = { quantity?: number; unitPrice?: number; amount?: number };
+type RawSheet = { lineItems?: RawLineItem[] };
+
+function computeTotalIncVAT(invoiceData: unknown): number | null {
+  if (!invoiceData || typeof invoiceData !== "object") return null;
+  const d = invoiceData as { lineItems?: RawLineItem[]; extraSheets?: RawSheet[] };
+  const itemSum = (items: RawLineItem[] = []) =>
+    items.reduce((s, i) => s + (i.amount !== undefined ? i.amount : (i.quantity ?? 0) * (i.unitPrice ?? 0)), 0);
+  const mainExVAT = itemSum(d.lineItems);
+  const extraExVAT = (d.extraSheets ?? []).reduce((s, sh) => s + itemSum(sh.lineItems), 0);
+  return (mainExVAT + extraExVAT) * 1.18;
 }
 
 type SearchParams = Promise<{
@@ -72,7 +85,7 @@ export default async function TaxInvoiceHistoryPage({
   const currentPage = Math.max(1, Number(page) || 1);
   const where = buildWhere(search, payment, mode, from);
 
-  const [totalCount, paymentModeRows, invoiceRows] = await Promise.all([
+  const [totalCount, paymentModeRows, invoiceRows, totalAgg] = await Promise.all([
     prisma.taxInvoice.count({ where }),
     prisma.taxInvoice.findMany({
       where,
@@ -104,8 +117,10 @@ export default async function TaxInvoiceHistoryPage({
         },
       },
     }),
+    prisma.taxInvoice.aggregate({ where, _sum: { totalAmount: true } }),
   ]);
 
+  const grandTotal = totalAgg._sum.totalAmount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
 
@@ -120,6 +135,7 @@ export default async function TaxInvoiceHistoryPage({
       placeOfSupply: inv.placeOfSupply || (data?.placeOfSupply ?? null),
       purchaserName: inv.purchaserName || (data?.purchaserName ?? null),
       additionalInfo: inv.additionalInfo || (data?.additionalInfo ?? null),
+      displayTotal: computeTotalIncVAT(inv.invoiceData) ?? inv.totalAmount,
     };
   });
 
@@ -184,7 +200,7 @@ export default async function TaxInvoiceHistoryPage({
                   invoiceDate: r.invoiceDate.toISOString().split("T")[0],
                   placeOfSupply: r.placeOfSupply ?? null,
                   paymentMode: r.paymentMode ?? null,
-                  totalAmount: r.totalAmount,
+                  totalAmount: r.displayTotal,
                   isPaid: r.isPaid,
                   additionalInfo: r.additionalInfo ?? null,
                 }))}
@@ -251,7 +267,7 @@ export default async function TaxInvoiceHistoryPage({
                             )}
                           </td>
                           <td className="px-5 py-4">{invoice.paymentMode || "—"}</td>
-                          <td className="px-5 py-4 font-medium">{formatCurrency(invoice.totalAmount)}</td>
+                          <td className="px-5 py-4 font-medium">{formatCurrency(invoice.displayTotal)}</td>
                           <td className="px-5 py-4 text-muted-foreground">{invoice.createdAt.toLocaleString("en-US")}</td>
                           <td className="px-5 py-4">
                             <StatusBadge label="Saved" variant="green" />
@@ -270,10 +286,26 @@ export default async function TaxInvoiceHistoryPage({
               </div>
             )}
 
-            {totalPages > 1 && (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+            <div className="mt-4 space-y-3">
+              {/* Total card */}
+              <div className="flex justify-end">
+                <div className="rounded-2xl border border-border bg-card px-6 py-4 shadow-sm text-right">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Total Amount Including VAT
+                  </p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
+                    {formatCurrency(grandTotal)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Across {totalCount} invoice{totalCount !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+
+              {/* Pagination row */}
+              <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
                 <p>
-                  Showing <span className="font-semibold text-foreground">{start}</span>-
+                  Showing <span className="font-semibold text-foreground">{start}</span>–
                   <span className="font-semibold text-foreground">{end}</span> of{" "}
                   <span className="font-semibold text-foreground">{totalCount}</span> invoices
                 </p>
@@ -299,7 +331,7 @@ export default async function TaxInvoiceHistoryPage({
                   </Link>
                 </div>
               </div>
-            )}
+            </div>
           </>
         )}
       </div>
