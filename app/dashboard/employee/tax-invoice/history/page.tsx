@@ -10,6 +10,7 @@ import InvoiceRowActions from "./InvoiceRowActions";
 import InvoicePaidToggle from "./InvoicePaidToggle";
 import InvoiceFilters from "./InvoiceFilters";
 import ExportButton from "./ExportButton";
+import ExportAllButton from "./ExportAllButton";
 
 export const metadata = { title: "Tax Invoice History — Swin Suppliers" };
 
@@ -193,7 +194,7 @@ export default async function TaxInvoiceHistoryPage({
               />
             </Suspense>
 
-            <div className="mb-4 flex justify-end">
+            <div className="mb-4 flex justify-end items-start gap-2">
               <ExportButton
                 rows={rows.map((r) => ({
                   taxInvoiceNo: r.taxInvoiceNo,
@@ -205,6 +206,7 @@ export default async function TaxInvoiceHistoryPage({
                   additionalInfo: r.additionalInfo ?? null,
                 }))}
               />
+              <ExportAllButton totalCount={totalCount} />
             </div>
 
             {rows.length === 0 ? (

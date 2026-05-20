@@ -241,6 +241,69 @@ export async function updateTaxInvoiceById(
   }
 }
 
+export type ExportableInvoice = {
+  taxInvoiceNo: string;
+  invoiceDate: string;
+  purchaserName: string | null;
+  placeOfSupply: string | null;
+  paymentMode: string | null;
+  totalAmount: number;
+  isPaid: boolean;
+  additionalInfo: string | null;
+  createdBy: string;
+};
+
+function computeTotalIncVATFromRaw(invoiceData: unknown): number | null {
+  if (!invoiceData || typeof invoiceData !== "object") return null;
+  type RawItem = { quantity?: number; unitPrice?: number; amount?: number };
+  type RawSheet = { lineItems?: RawItem[] };
+  const d = invoiceData as { lineItems?: RawItem[]; extraSheets?: RawSheet[] };
+  const itemSum = (items: RawItem[] = []) =>
+    items.reduce((s, i) => s + (i.amount !== undefined ? i.amount : (i.quantity ?? 0) * (i.unitPrice ?? 0)), 0);
+  const mainEx = itemSum(d.lineItems);
+  const extraEx = (d.extraSheets ?? []).reduce((s, sh) => s + itemSum(sh.lineItems), 0);
+  return (mainEx + extraEx) * 1.18;
+}
+
+export async function getAllTaxInvoicesForExport(): Promise<TaxInvoiceActionResult<ExportableInvoice[]>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated." };
+
+  try {
+    const invoices = await prisma.taxInvoice.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        taxInvoiceNo: true,
+        invoiceDate: true,
+        purchaserName: true,
+        placeOfSupply: true,
+        paymentMode: true,
+        totalAmount: true,
+        isPaid: true,
+        additionalInfo: true,
+        invoiceData: true,
+        user: { select: { name: true } },
+      },
+    });
+
+    const rows: ExportableInvoice[] = invoices.map((inv) => ({
+      taxInvoiceNo: inv.taxInvoiceNo,
+      invoiceDate: inv.invoiceDate.toISOString().split("T")[0],
+      purchaserName: inv.purchaserName,
+      placeOfSupply: inv.placeOfSupply,
+      paymentMode: inv.paymentMode,
+      totalAmount: computeTotalIncVATFromRaw(inv.invoiceData) ?? inv.totalAmount,
+      isPaid: inv.isPaid,
+      additionalInfo: inv.additionalInfo,
+      createdBy: inv.user.name,
+    }));
+
+    return { success: true, data: rows };
+  } catch {
+    return { success: false, error: "Failed to fetch invoices for export." };
+  }
+}
+
 export async function deleteTaxInvoiceById(
   invoiceId: string
 ): Promise<TaxInvoiceActionResult> {

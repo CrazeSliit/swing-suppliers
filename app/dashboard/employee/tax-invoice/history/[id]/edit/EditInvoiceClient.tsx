@@ -55,34 +55,11 @@ export default function EditInvoiceClient({ invoiceId, initialData }: Props) {
   };
 
   const handlePrint = () => {
-    const el = document.getElementById("invoice-preview");
-    if (!el) {
-      window.print();
-      return;
-    }
-
-    const printWin = window.open("", "_blank");
-    if (!printWin) {
-      window.print();
-      return;
-    }
-
-    printWin.document.write(`<!DOCTYPE html><html><head>
-<meta charset="utf-8">
-<title>Tax Invoice</title>
-<style>
-  @page { size: A4 portrait; margin: 0mm; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: white; }
-  #invoice-preview { display: flex; flex-direction: column; gap: 0; }
-  .invoice-page { width: 210mm; min-height: 297mm; height: auto; overflow: visible; box-shadow: none; break-after: page; page-break-after: always; }
-  .invoice-page:last-child { break-after: auto; page-break-after: auto; }
-</style>
-</head><body>${el.outerHTML}</body></html>`);
-    printWin.document.close();
-    printWin.focus();
-    printWin.print();
-    printWin.close();
+    window.open(
+      `/dashboard/employee/tax-invoice/history/${invoiceId}/print`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   return (
