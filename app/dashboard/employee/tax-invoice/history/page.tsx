@@ -204,6 +204,7 @@ export default async function TaxInvoiceHistoryPage({
                 rows={rows.map((r) => ({
                   taxInvoiceNo: r.taxInvoiceNo,
                   invoiceDate: r.invoiceDate.toISOString().split("T")[0],
+                  purchaserName: r.purchaserName ?? null,
                   placeOfSupply: r.placeOfSupply ?? null,
                   paymentMode: r.paymentMode ?? null,
                   totalAmount: r.displayTotal,

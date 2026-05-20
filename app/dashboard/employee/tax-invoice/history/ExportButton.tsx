@@ -5,6 +5,7 @@ import { utils, writeFile } from "xlsx";
 export type ExportRow = {
   taxInvoiceNo: string;
   invoiceDate: string;       // pre-formatted ISO date string
+  purchaserName: string | null;
   placeOfSupply: string | null;
   paymentMode: string | null;
   totalAmount: number;
@@ -20,6 +21,7 @@ type Props = {
 const HEADERS = [
   "Invoice No.",
   "Date",
+  "Purchaser Name",
   "Place of Supply",
   "Payment Mode",
   "Total (Rs.)",
@@ -27,7 +29,7 @@ const HEADERS = [
   "Additional Information",
 ];
 
-const COL_WIDTHS = [18, 14, 20, 16, 14, 10, 40];
+const COL_WIDTHS = [18, 14, 22, 20, 16, 14, 10, 40];
 
 export default function ExportButton({ rows, filename = "tax-invoices" }: Props) {
   const handleExport = () => {
@@ -37,6 +39,7 @@ export default function ExportButton({ rows, filename = "tax-invoices" }: Props)
       ...rows.map((r) => [
         r.taxInvoiceNo,
         r.invoiceDate,
+        r.purchaserName ?? "",
         r.placeOfSupply ?? "",
         r.paymentMode ?? "",
         r.totalAmount,
@@ -52,11 +55,11 @@ export default function ExportButton({ rows, filename = "tax-invoices" }: Props)
 
     // Register the range as an Excel Table (ListObject)
     const lastRow = rows.length; // 0-based: header=0, data rows=1..lastRow
-    ws["!autofilter"] = { ref: `A1:G1` };
+    ws["!autofilter"] = { ref: `A1:H1` };
     ws["!tables"] = [
       {
         name: "InvoiceTable",
-        ref: `A1:G${lastRow + 1}`,
+        ref: `A1:H${lastRow + 1}`,
         headerRow: true,
         totalsRow: false,
         styleInfo: {
