@@ -86,7 +86,7 @@ export default async function TaxInvoiceHistoryPage({
   const currentPage = Math.max(1, Number(page) || 1);
   const where = buildWhere(search, payment, mode, from);
 
-  const [totalCount, paymentModeRows, invoiceRows, totalAgg] = await Promise.all([
+  const [totalCount, paymentModeRows, invoiceRows, allInvoiceTotals] = await Promise.all([
     prisma.taxInvoice.count({ where }),
     prisma.taxInvoice.findMany({
       where,
@@ -118,10 +118,15 @@ export default async function TaxInvoiceHistoryPage({
         },
       },
     }),
-    prisma.taxInvoice.aggregate({ where, _sum: { totalAmount: true } }),
+    prisma.taxInvoice.findMany({
+      where,
+      select: { invoiceData: true, totalAmount: true },
+    }),
   ]);
 
-  const grandTotal = totalAgg._sum.totalAmount ?? 0;
+  const grandTotal = allInvoiceTotals.reduce((sum, inv) => {
+    return sum + (computeTotalIncVAT(inv.invoiceData) ?? inv.totalAmount ?? 0);
+  }, 0);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
 

@@ -7,7 +7,6 @@ import { getAllTaxInvoicesForExport } from "@/app/actions/tax-invoice";
 const HEADERS = [
   "Invoice No.",
   "Date",
-  "Created By",
   "Purchaser Name",
   "Place of Supply",
   "Payment Mode",
@@ -16,7 +15,7 @@ const HEADERS = [
   "Additional Information",
 ];
 
-const COL_WIDTHS = [18, 14, 20, 22, 20, 16, 22, 10, 40];
+const COL_WIDTHS = [18, 14, 22, 20, 16, 22, 10, 40];
 
 export default function ExportAllButton({ totalCount }: { totalCount: number }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +41,6 @@ export default function ExportAllButton({ totalCount }: { totalCount: number }) 
       ...rows.map((r) => [
         r.taxInvoiceNo,
         r.invoiceDate,
-        r.createdBy,
         r.purchaserName ?? "",
         r.placeOfSupply ?? "",
         r.paymentMode ?? "",
@@ -54,11 +52,11 @@ export default function ExportAllButton({ totalCount }: { totalCount: number }) 
 
     const ws = utils.aoa_to_sheet(sheetData);
     ws["!cols"] = COL_WIDTHS.map((wch) => ({ wch }));
-    ws["!autofilter"] = { ref: `A1:I1` };
+    ws["!autofilter"] = { ref: `A1:H1` };
     ws["!tables"] = [
       {
         name: "AllInvoicesTable",
-        ref: `A1:I${rows.length + 1}`,
+        ref: `A1:H${rows.length + 1}`,
         headerRow: true,
         totalsRow: false,
         styleInfo: {

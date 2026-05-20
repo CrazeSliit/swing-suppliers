@@ -286,17 +286,24 @@ export async function getAllTaxInvoicesForExport(): Promise<TaxInvoiceActionResu
       },
     });
 
-    const rows: ExportableInvoice[] = invoices.map((inv) => ({
-      taxInvoiceNo: inv.taxInvoiceNo,
-      invoiceDate: inv.invoiceDate.toISOString().split("T")[0],
-      purchaserName: inv.purchaserName,
-      placeOfSupply: inv.placeOfSupply,
-      paymentMode: inv.paymentMode,
-      totalAmount: computeTotalIncVATFromRaw(inv.invoiceData) ?? inv.totalAmount,
-      isPaid: inv.isPaid,
-      additionalInfo: inv.additionalInfo,
-      createdBy: inv.user.name,
-    }));
+    const rows: ExportableInvoice[] = invoices.map((inv) => {
+      const data = inv.invoiceData as {
+        placeOfSupply?: string;
+        purchaserName?: string;
+        additionalInfo?: string;
+      } | null;
+      return {
+        taxInvoiceNo: inv.taxInvoiceNo,
+        invoiceDate: inv.invoiceDate.toISOString().split("T")[0],
+        purchaserName: inv.purchaserName || (data?.purchaserName ?? null),
+        placeOfSupply: inv.placeOfSupply || (data?.placeOfSupply ?? null),
+        paymentMode: inv.paymentMode,
+        totalAmount: computeTotalIncVATFromRaw(inv.invoiceData) ?? inv.totalAmount,
+        isPaid: inv.isPaid,
+        additionalInfo: inv.additionalInfo || (data?.additionalInfo ?? null),
+        createdBy: inv.user.name,
+      };
+    });
 
     return { success: true, data: rows };
   } catch {
