@@ -78,9 +78,6 @@ export async function saveTaxInvoice(
   }
 
   const invoiceDate = new Date(invoiceData.invoiceDate);
-  if (Number.isNaN(invoiceDate.getTime())) {
-    return { success: false, error: "Invoice date is invalid." };
-  }
 
   const invoicePayload = {
     invoiceDate,
@@ -212,14 +209,12 @@ export async function updateTaxInvoiceById(
     return { success: false, error: "Tax invoice number is required." };
   }
 
-  const invoiceDate = new Date(invoiceData.invoiceDate);
-  if (Number.isNaN(invoiceDate.getTime())) {
-    return { success: false, error: "Invoice date is invalid." };
-  }
+  const parsedDate = new Date(invoiceData.invoiceDate);
+  const invoiceDatePayload = Number.isNaN(parsedDate.getTime()) ? {} : { invoiceDate: parsedDate };
 
   const invoicePayload = {
     taxInvoiceNo,
-    invoiceDate,
+    ...invoiceDatePayload,
     purchaserName: invoiceData.purchaserName.trim() || null,
     paymentMode: invoiceData.paymentMode.trim() || null,
     placeOfSupply: invoiceData.placeOfSupply.trim() || null,
