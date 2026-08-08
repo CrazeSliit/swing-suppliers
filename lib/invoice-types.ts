@@ -29,6 +29,12 @@ export interface InvoiceData {
   lineItems: LineItem[];
   paymentMode: string;
   extraSheets: ExtraSheet[];
+  // Shared "one common price for everything" mode — a single flat Unit Price
+  // and Amount Excl. VAT that apply across the whole invoice (main page +
+  // every extra sheet), independent of each line's own quantity.
+  useCommonPricing?: boolean;
+  commonUnitPrice?: number;
+  commonAmount?: number;
 }
 
 export const defaultInvoiceData: InvoiceData = {
@@ -50,6 +56,7 @@ export const defaultInvoiceData: InvoiceData = {
   ],
   paymentMode: "",
   extraSheets: [],
+  useCommonPricing: false,
 };
 
 export function numberToWords(n: number): string {

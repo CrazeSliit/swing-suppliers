@@ -264,10 +264,16 @@ function ItemsTable({
   items,
   fillerCount,
   rowRefs,
+  useCommonPricing = false,
+  commonUnitPrice = 0,
+  commonAmount = 0,
 }: {
   items: { id: string; reference: string; description: string; quantity: number; unitPrice: number; amount?: number }[];
   fillerCount: number;
   rowRefs?: React.MutableRefObject<Map<string, HTMLTableRowElement | null>>;
+  useCommonPricing?: boolean;
+  commonUnitPrice?: number;
+  commonAmount?: number;
 }) {
   return (
     <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -281,7 +287,7 @@ function ItemsTable({
         </tr>
       </thead>
       <tbody>
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <tr
             key={item.id}
             ref={(el) => {
@@ -293,8 +299,20 @@ function ItemsTable({
             <td style={cell({ height: "28px" })}>{item.reference}</td>
             <td style={cell({ height: "28px" })}>{item.description}</td>
             <td style={cell({ textAlign: "center", height: "28px" })}>{item.quantity}</td>
-            <td style={cell({ textAlign: "right",  height: "28px" })}>{fmt(item.unitPrice)}</td>
-            <td style={cell({ textAlign: "right",  height: "28px" })}>{fmt(item.amount !== undefined ? item.amount : item.quantity * item.unitPrice)}</td>
+            {useCommonPricing ? (
+              idx === 0 && (
+                <td rowSpan={items.length} style={cell({ textAlign: "right", verticalAlign: "middle" })}>{fmt(commonUnitPrice)}</td>
+              )
+            ) : (
+              <td style={cell({ textAlign: "right",  height: "28px" })}>{fmt(item.unitPrice)}</td>
+            )}
+            {useCommonPricing ? (
+              idx === 0 && (
+                <td rowSpan={items.length} style={cell({ textAlign: "right", verticalAlign: "middle" })}>{fmt(commonAmount)}</td>
+              )
+            ) : (
+              <td style={cell({ textAlign: "right",  height: "28px" })}>{fmt(item.amount !== undefined ? item.amount : item.quantity * item.unitPrice)}</td>
+            )}
           </tr>
         ))}
         {Array.from({ length: Math.max(0, fillerCount) }).map((_, i) => (
@@ -435,7 +453,7 @@ function ExtraSheetPages({
                 )}
 
                 {/* Items */}
-                <ItemsTable items={pageItems} fillerCount={fillerCount} />
+                <ItemsTable items={pageItems} fillerCount={fillerCount} useCommonPricing={data.useCommonPricing} commonUnitPrice={data.commonUnitPrice ?? 0} commonAmount={data.commonAmount ?? 0} />
 
                 {!isLast && (
                   <div style={{ marginTop: "6px", textAlign: "right", fontSize: "9px", color: "#8090b0", fontStyle: "italic" }}>
@@ -506,10 +524,13 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
   const extraSheets  = data.extraSheets ?? [];
   const hasExtra     = extraSheets.length > 0;
 
-  // Combined totals across ALL sheets (main + all extra)
-  const combinedExVAT = mainExVAT + extraSheets.reduce(
-    (s, sheet) => s + sheet.lineItems.reduce((ss, i) => ss + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0), 0
-  );
+  // Combined totals across ALL sheets (main + all extra). When "common pricing"
+  // is on, the whole invoice shares one flat Amount Excl. VAT instead.
+  const combinedExVAT = data.useCommonPricing
+    ? (data.commonAmount ?? 0)
+    : mainExVAT + extraSheets.reduce(
+        (s, sheet) => s + sheet.lineItems.reduce((ss, i) => ss + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0), 0
+      );
   const combinedVAT   = combinedExVAT * 0.18;
   const combinedGrand = combinedExVAT + combinedVAT;
 
@@ -659,7 +680,7 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
                 )}
 
                 {/* Items */}
-                <ItemsTable items={pageItems} fillerCount={fillerCount} />
+                <ItemsTable items={pageItems} fillerCount={fillerCount} useCommonPricing={data.useCommonPricing} commonUnitPrice={data.commonUnitPrice ?? 0} commonAmount={data.commonAmount ?? 0} />
 
                 {!isLast && (
                   <div style={{ marginTop: "6px", textAlign: "right", fontSize: "9px", color: "#8090b0", fontStyle: "italic" }}>

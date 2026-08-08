@@ -242,6 +242,44 @@ export default function InvoiceForm({ data, onChange }: Props) {
     setRawAmounts((prev) => { const n = { ...prev }; delete n[id]; return n; });
   };
 
+  // "Common pricing" — a single flat Unit Price and Amount Excl. VAT shared
+  // across the whole invoice (main page + every extra sheet), independent of
+  // each line's own quantity. Stored on the top-level InvoiceData so every
+  // sheet's toggle/inputs stay in sync.
+  const COMMON_KEY = "__common__";
+
+  const toggleCommonPricing = (checked: boolean) => {
+    onChange({ ...data, useCommonPricing: checked });
+  };
+
+  const handleCommonUnitPriceChange = (raw: string) => {
+    const cleaned = raw.replace(/[^\d.]/g, "");
+    const parts = cleaned.split(".");
+    const intPart = normalizeLeadingZeros(parts[0] ?? "");
+    const decPart = parts.length > 1 ? parts.slice(1).join("").slice(0, 2) : undefined;
+    const norm = decPart !== undefined ? `${intPart || "0"}.${decPart}` : intPart;
+    setRawPrices((prev) => ({ ...prev, [COMMON_KEY]: norm }));
+    onChange({ ...data, commonUnitPrice: parseFloat(norm || "0") || 0 });
+  };
+
+  const commitCommonRawPrice = () => {
+    setRawPrices((prev) => { const n = { ...prev }; delete n[COMMON_KEY]; return n; });
+  };
+
+  const handleCommonAmountChange = (raw: string) => {
+    const cleaned = raw.replace(/[^\d.]/g, "");
+    const parts = cleaned.split(".");
+    const intPart = normalizeLeadingZeros(parts[0] ?? "");
+    const decPart = parts.length > 1 ? parts.slice(1).join("").slice(0, 2) : undefined;
+    const norm = decPart !== undefined ? `${intPart || "0"}.${decPart}` : intPart;
+    setRawAmounts((prev) => ({ ...prev, [COMMON_KEY]: norm }));
+    onChange({ ...data, commonAmount: parseFloat(norm || "0") || 0 });
+  };
+
+  const commitCommonRawAmount = () => {
+    setRawAmounts((prev) => { const n = { ...prev }; delete n[COMMON_KEY]; return n; });
+  };
+
   // Estimate how many visual lines each description occupies (~41 chars/line in the desc column)
   const estimateLines = (desc: string) => desc ? Math.ceil(desc.length / 41) : 1;
   const usedLines = data.lineItems.reduce((s, item) => s + estimateLines(item.description), 0);
@@ -249,9 +287,14 @@ export default function InvoiceForm({ data, onChange }: Props) {
   const hasExtraSheets = data.extraSheets.length > 0;
   const mainPageMaxLines = 16;
   const fillerCount = Math.max(0, mainPageMaxLines - usedLines);
-  const totalExVAT  = data.lineItems.reduce((s, i) => s + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0);
+  const totalExVAT  = data.useCommonPricing
+    ? (data.commonAmount ?? 0)
+    : data.lineItems.reduce((s, i) => s + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0);
   const vatAmount   = totalExVAT * 0.18;
   const totalIncVAT = totalExVAT + vatAmount;
+
+  const commonUnitPriceDisplay = rawPrices[COMMON_KEY] ?? ((data.commonUnitPrice ?? 0) === 0 ? "" : String(data.commonUnitPrice));
+  const commonAmountDisplay = rawAmounts[COMMON_KEY] ?? ((data.commonAmount ?? 0) === 0 ? "" : fmt(data.commonAmount ?? 0));
 
   return (
     <>
@@ -354,6 +397,14 @@ export default function InvoiceForm({ data, onChange }: Props) {
               </tbody>
             </table>
 
+            {/* Common pricing toggle */}
+            <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", padding: "2px 2px 4px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "10.5px", color: labelColor, cursor: "pointer", userSelect: "none" }}>
+                <input type="checkbox" checked={!!data.useCommonPricing} onChange={(e) => toggleCommonPricing(e.target.checked)} />
+                Use one common Unit Price &amp; Amount for all items
+              </label>
+            </div>
+
             {/* Line Items table — all items, no pagination */}
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -366,36 +417,52 @@ export default function InvoiceForm({ data, onChange }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {data.lineItems.map((item) => (
+                {data.lineItems.map((item, idx) => (
                   <tr key={item.id}>
                     <td style={cell({ padding: "0 8px", height: "28px", verticalAlign: "top" })}>
                       <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center" }}>
                         <input type="text" value={item.reference} onChange={(e) => updateItem(item.id, "reference", e.target.value)} placeholder="Ref" style={inpStyle} />
                       </div>
                     </td>
-                    <td style={cell({ padding: "4px 8px", verticalAlign: "top" })}>
+                    <td style={cell({ padding: "4px 30px 4px 8px", verticalAlign: "top", position: "relative" })}>
                       <AutoTextarea
                         value={item.description}
                         onChange={(v) => updateItem(item.id, "description", v)}
                         placeholder="Description"
                       />
+                      <button onClick={() => removeItem(item.id)} disabled={data.lineItems.length === 1} style={{ ...floatingDeleteButtonStyle, opacity: data.lineItems.length === 1 ? 0.3 : 1, cursor: data.lineItems.length === 1 ? "not-allowed" : "pointer" }} title="Remove row">✕</button>
                     </td>
                     <td style={cell({ textAlign: "center", padding: "0 8px", height: "28px", verticalAlign: "top" })}>
                       <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <input type="text" inputMode="numeric" value={item.quantity === 0 ? "" : String(item.quantity)} onChange={(e) => handleQuantityChange(item.id, e.target.value)} placeholder="1" style={{ ...inpStyle, textAlign: "center" }} />
                       </div>
                     </td>
-                    <td style={cell({ textAlign: "right", padding: "0 8px", height: "28px", verticalAlign: "top" })}>
-                      <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                        <input type="text" inputMode="decimal" value={rawPrices[item.id] ?? (item.unitPrice === 0 ? "" : String(item.unitPrice))} onChange={(e) => handleUnitPriceChange(item.id, e.target.value)} onBlur={() => commitRawPrice(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} />
-                      </div>
-                    </td>
-                    <td style={cell({ textAlign: "right", padding: "0 30px 0 8px", height: "28px", verticalAlign: "top", position: "relative" })}>
-                      <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                        <input type="text" inputMode="decimal" value={rawAmounts[item.id] ?? (item.amount !== undefined ? fmt(item.amount) : (item.quantity * item.unitPrice === 0 ? "" : fmt(item.quantity * item.unitPrice)))} onChange={(e) => handleAmountChange(item.id, e.target.value)} onBlur={() => commitRawAmount(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} />
-                      </div>
-                      <button onClick={() => removeItem(item.id)} disabled={data.lineItems.length === 1} style={{ ...floatingDeleteButtonStyle, opacity: data.lineItems.length === 1 ? 0.3 : 1, cursor: data.lineItems.length === 1 ? "not-allowed" : "pointer" }} title="Remove row">✕</button>
-                    </td>
+                    {data.useCommonPricing ? (
+                      idx === 0 && (
+                        <td rowSpan={data.lineItems.length} style={cell({ textAlign: "right", padding: "0 8px", verticalAlign: "middle" })}>
+                          <input type="text" inputMode="decimal" value={commonUnitPriceDisplay} onChange={(e) => handleCommonUnitPriceChange(e.target.value)} onBlur={commitCommonRawPrice} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} />
+                        </td>
+                      )
+                    ) : (
+                      <td style={cell({ textAlign: "right", padding: "0 8px", height: "28px", verticalAlign: "top" })}>
+                        <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                          <input type="text" inputMode="decimal" value={rawPrices[item.id] ?? (item.unitPrice === 0 ? "" : String(item.unitPrice))} onChange={(e) => handleUnitPriceChange(item.id, e.target.value)} onBlur={() => commitRawPrice(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} />
+                        </div>
+                      </td>
+                    )}
+                    {data.useCommonPricing ? (
+                      idx === 0 && (
+                        <td rowSpan={data.lineItems.length} style={cell({ textAlign: "right", padding: "0 8px", verticalAlign: "middle" })}>
+                          <input type="text" inputMode="decimal" value={commonAmountDisplay} onChange={(e) => handleCommonAmountChange(e.target.value)} onBlur={commitCommonRawAmount} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} />
+                        </td>
+                      )
+                    ) : (
+                      <td style={cell({ textAlign: "right", padding: "0 8px", height: "28px", verticalAlign: "top" })}>
+                        <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                          <input type="text" inputMode="decimal" value={rawAmounts[item.id] ?? (item.amount !== undefined ? fmt(item.amount) : (item.quantity * item.unitPrice === 0 ? "" : fmt(item.quantity * item.unitPrice)))} onChange={(e) => handleAmountChange(item.id, e.target.value)} onBlur={() => commitRawAmount(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} />
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
 
@@ -614,12 +681,52 @@ function ExtraSheetForm({
     setRawAmounts((prev) => { const n = { ...prev }; delete n[id]; return n; });
   };
 
+  // "Common pricing" is a single flat Unit Price / Amount shared across the
+  // whole invoice (main page + every extra sheet) — stored on the top-level
+  // InvoiceData so this sheet's toggle/inputs stay in sync with the others.
+  const SHEET_COMMON_KEY = "__common__";
+
+  const toggleCommonPricing = (checked: boolean) => {
+    onChange({ ...data, useCommonPricing: checked });
+  };
+
+  const handleCommonPriceChange = (raw: string) => {
+    const cleaned = raw.replace(/[^\d.]/g, "");
+    const parts = cleaned.split(".");
+    const intPart = normalizeLeadingZeros(parts[0] ?? "");
+    const decPart = parts.length > 1 ? parts.slice(1).join("").slice(0, 2) : undefined;
+    const norm = decPart !== undefined ? `${intPart || "0"}.${decPart}` : intPart;
+    setRawPrices((prev) => ({ ...prev, [SHEET_COMMON_KEY]: norm }));
+    onChange({ ...data, commonUnitPrice: parseFloat(norm || "0") || 0 });
+  };
+
+  const commitCommonRawPrice = () => {
+    setRawPrices((prev) => { const n = { ...prev }; delete n[SHEET_COMMON_KEY]; return n; });
+  };
+
+  const handleCommonAmountChange = (raw: string) => {
+    const cleaned = raw.replace(/[^\d.]/g, "");
+    const parts = cleaned.split(".");
+    const intPart = normalizeLeadingZerosE(parts[0] ?? "");
+    const decPart = parts.length > 1 ? parts.slice(1).join("").slice(0, 2) : undefined;
+    const norm = decPart !== undefined ? `${intPart || "0"}.${decPart}` : intPart;
+    setRawAmounts((prev) => ({ ...prev, [SHEET_COMMON_KEY]: norm }));
+    onChange({ ...data, commonAmount: parseFloat(norm || "0") || 0 });
+  };
+
+  const commitCommonRawAmount = () => {
+    setRawAmounts((prev) => { const n = { ...prev }; delete n[SHEET_COMMON_KEY]; return n; });
+  };
+
   const isLastSheet = sheet.id === data.extraSheets[data.extraSheets.length - 1]?.id;
   const mainExVAT   = data.lineItems.reduce((s, i) => s + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0);
   const allExtraExVAT = data.extraSheets.reduce((s, sh) => s + sh.lineItems.reduce((ss, i) => ss + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0), 0);
-  const combinedExVAT = mainExVAT + allExtraExVAT;
+  const combinedExVAT = data.useCommonPricing ? (data.commonAmount ?? 0) : mainExVAT + allExtraExVAT;
   const combinedVAT   = combinedExVAT * 0.18;
   const combinedGrand = combinedExVAT + combinedVAT;
+
+  const commonUnitPriceDisplay = rawPrices[SHEET_COMMON_KEY] ?? ((data.commonUnitPrice ?? 0) === 0 ? "" : String(data.commonUnitPrice));
+  const commonAmountDisplay = rawAmounts[SHEET_COMMON_KEY] ?? ((data.commonAmount ?? 0) === 0 ? "" : fmt(data.commonAmount ?? 0));
 
   return (
     <>
@@ -719,6 +826,14 @@ function ExtraSheetForm({
             </tbody>
           </table>
 
+          {/* Common pricing toggle */}
+          <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", padding: "2px 2px 4px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "10.5px", color: labelColor, cursor: "pointer", userSelect: "none" }}>
+              <input type="checkbox" checked={!!data.useCommonPricing} onChange={(e) => toggleCommonPricing(e.target.checked)} />
+              Use one common Unit Price &amp; Amount for all items
+            </label>
+          </div>
+
           {/* Line Items — all rows, no pagination */}
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
@@ -731,13 +846,25 @@ function ExtraSheetForm({
               </tr>
             </thead>
             <tbody>
-              {sheet.lineItems.map((item) => (
+              {sheet.lineItems.map((item, idx) => (
                 <tr key={item.id}>
                   <td style={cell({ padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center" }}><input type="text" value={item.reference} onChange={(e) => updateItem(item.id, "reference", e.target.value)} placeholder="Ref" style={inpStyle} /></div></td>
-                  <td style={cell({ padding: "4px 8px", verticalAlign: "top" })}><AutoTextarea value={item.description} onChange={(v) => updateItem(item.id, "description", v)} placeholder="Description" /></td>
+                  <td style={cell({ padding: "4px 30px 4px 8px", verticalAlign: "top", position: "relative" })}><AutoTextarea value={item.description} onChange={(v) => updateItem(item.id, "description", v)} placeholder="Description" /><button onClick={() => removeItem(item.id)} disabled={sheet.lineItems.length === 1} style={{ ...floatingDeleteButtonStyle, opacity: sheet.lineItems.length === 1 ? 0.3 : 1, cursor: sheet.lineItems.length === 1 ? "not-allowed" : "pointer" }} title="Remove row">✕</button></td>
                   <td style={cell({ textAlign: "center", padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}><input type="text" inputMode="numeric" value={item.quantity === 0 ? "" : String(item.quantity)} onChange={(e) => handleQty(item.id, e.target.value)} placeholder="1" style={{ ...inpStyle, textAlign: "center" }} /></div></td>
-                  <td style={cell({ textAlign: "right", padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}><input type="text" inputMode="decimal" value={rawPrices[item.id] ?? (item.unitPrice === 0 ? "" : String(item.unitPrice))} onChange={(e) => handlePrice(item.id, e.target.value)} onBlur={() => commitRawPrice(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></div></td>
-                  <td style={cell({ textAlign: "right", padding: "0 30px 0 8px", height: "28px", verticalAlign: "top", position: "relative" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}><input type="text" inputMode="decimal" value={rawAmounts[item.id] ?? (item.amount !== undefined ? fmt(item.amount) : (item.quantity * item.unitPrice === 0 ? "" : fmt(item.quantity * item.unitPrice)))} onChange={(e) => handleAmountChange(item.id, e.target.value)} onBlur={() => commitRawAmount(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></div><button onClick={() => removeItem(item.id)} disabled={sheet.lineItems.length === 1} style={{ ...floatingDeleteButtonStyle, opacity: sheet.lineItems.length === 1 ? 0.3 : 1, cursor: sheet.lineItems.length === 1 ? "not-allowed" : "pointer" }} title="Remove row">✕</button></td>
+                  {data.useCommonPricing ? (
+                    idx === 0 && (
+                      <td rowSpan={sheet.lineItems.length} style={cell({ textAlign: "right", padding: "0 8px", verticalAlign: "middle" })}><input type="text" inputMode="decimal" value={commonUnitPriceDisplay} onChange={(e) => handleCommonPriceChange(e.target.value)} onBlur={commitCommonRawPrice} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></td>
+                    )
+                  ) : (
+                    <td style={cell({ textAlign: "right", padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}><input type="text" inputMode="decimal" value={rawPrices[item.id] ?? (item.unitPrice === 0 ? "" : String(item.unitPrice))} onChange={(e) => handlePrice(item.id, e.target.value)} onBlur={() => commitRawPrice(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></div></td>
+                  )}
+                  {data.useCommonPricing ? (
+                    idx === 0 && (
+                      <td rowSpan={sheet.lineItems.length} style={cell({ textAlign: "right", padding: "0 8px", verticalAlign: "middle" })}><input type="text" inputMode="decimal" value={commonAmountDisplay} onChange={(e) => handleCommonAmountChange(e.target.value)} onBlur={commitCommonRawAmount} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></td>
+                    )
+                  ) : (
+                    <td style={cell({ textAlign: "right", padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end" }}><input type="text" inputMode="decimal" value={rawAmounts[item.id] ?? (item.amount !== undefined ? fmt(item.amount) : (item.quantity * item.unitPrice === 0 ? "" : fmt(item.quantity * item.unitPrice)))} onChange={(e) => handleAmountChange(item.id, e.target.value)} onBlur={() => commitRawAmount(item.id)} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></div></td>
+                  )}
                 </tr>
               ))}
 

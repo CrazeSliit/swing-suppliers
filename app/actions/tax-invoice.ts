@@ -37,6 +37,9 @@ function normalizeInvoiceData(raw: unknown): InvoiceData | null {
     paymentMode: typeof data.paymentMode === "string" ? data.paymentMode : "",
     lineItems,
     extraSheets,
+    useCommonPricing: typeof data.useCommonPricing === "boolean" ? data.useCommonPricing : false,
+    commonUnitPrice: typeof data.commonUnitPrice === "number" ? data.commonUnitPrice : undefined,
+    commonAmount: typeof data.commonAmount === "number" ? data.commonAmount : undefined,
   };
 }
 
@@ -56,6 +59,10 @@ async function canManageInvoice(invoiceId: string, userId: string, role: string)
 }
 
 function calculateTotalAmount(invoiceData: InvoiceData): number {
+  if (invoiceData.useCommonPricing) {
+    return (invoiceData.commonAmount ?? 0) * 1.18;
+  }
+
   const totalExcludingVat = invoiceData.lineItems.reduce(
     (sum, item) => sum + item.quantity * item.unitPrice,
     0
@@ -252,7 +259,15 @@ function computeTotalIncVATFromRaw(invoiceData: unknown): number | null {
   if (!invoiceData || typeof invoiceData !== "object") return null;
   type RawItem = { quantity?: number; unitPrice?: number; amount?: number };
   type RawSheet = { lineItems?: RawItem[] };
-  const d = invoiceData as { lineItems?: RawItem[]; extraSheets?: RawSheet[] };
+  const d = invoiceData as {
+    lineItems?: RawItem[];
+    extraSheets?: RawSheet[];
+    useCommonPricing?: boolean;
+    commonAmount?: number;
+  };
+  if (d.useCommonPricing) {
+    return (d.commonAmount ?? 0) * 1.18;
+  }
   const itemSum = (items: RawItem[] = []) =>
     items.reduce((s, i) => s + (i.amount !== undefined ? i.amount : (i.quantity ?? 0) * (i.unitPrice ?? 0)), 0);
   const mainEx = itemSum(d.lineItems);
