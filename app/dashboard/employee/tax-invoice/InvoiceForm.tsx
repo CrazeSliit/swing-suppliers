@@ -517,6 +517,7 @@ export default function InvoiceForm({ data, onChange }: Props) {
                       <option value="Cash">Cash</option>
                       <option value="Cheque">Cheque</option>
                       <option value="Bank Transfer">Bank Transfer</option>
+                      <option value="Bank Transfer and Cheque">Bank Transfer / Cheque</option>
                       <option value="Credit">Credit</option>
                       <option value="Online Payment">Online Payment</option>
                     </select>
