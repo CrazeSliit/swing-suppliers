@@ -28,7 +28,15 @@ type RawSheet = { lineItems?: RawLineItem[] };
 
 function computeTotalIncVAT(invoiceData: unknown): number | null {
   if (!invoiceData || typeof invoiceData !== "object") return null;
-  const d = invoiceData as { lineItems?: RawLineItem[]; extraSheets?: RawSheet[] };
+  const d = invoiceData as {
+    lineItems?: RawLineItem[];
+    extraSheets?: RawSheet[];
+    useCommonPricing?: boolean;
+    commonAmount?: number;
+  };
+  if (d.useCommonPricing) {
+    return (d.commonAmount ?? 0) * 1.18;
+  }
   const itemSum = (items: RawLineItem[] = []) =>
     items.reduce((s, i) => s + (i.amount !== undefined ? i.amount : (i.quantity ?? 0) * (i.unitPrice ?? 0)), 0);
   const mainExVAT = itemSum(d.lineItems);
