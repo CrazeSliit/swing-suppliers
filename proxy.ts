@@ -24,7 +24,7 @@ function readSession(
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     const session = readSession(request);

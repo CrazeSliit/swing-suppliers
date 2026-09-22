@@ -61,7 +61,11 @@ const fmt = (n: number) =>
 const fmtDate = (d: string) => {
   if (!d) return "";
   const [y, m, day] = d.split("-");
-  return `${day}/${m}/${y}`;
+  return new Date(Number(y), Number(m) - 1, Number(day)).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 };
 
 /**
