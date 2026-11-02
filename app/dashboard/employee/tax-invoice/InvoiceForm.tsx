@@ -344,17 +344,17 @@ export default function InvoiceForm({ data, onChange }: Props) {
               <tbody>
                 <tr>
                   <td style={cell({ width: "50%", verticalAlign: "top" })}>
-                    <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Suppliers TIN: </span><span style={readonlyStyle}>{data.supplierTIN}</span></div>
-                    <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier s Name: </span><span style={readonlyStyle}>{data.supplierName}</span></div>
+                    <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s TIN: </span><span style={readonlyStyle}>{data.supplierTIN}</span></div>
+                    <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s Name: </span><span style={readonlyStyle}>{data.supplierName}</span></div>
                     <div><span style={{ color: labelColor }}>Address: </span><span style={readonlyStyle}>{data.supplierAddress}</span></div>
                   </td>
                   <td style={cell({ verticalAlign: "top" })}>
                     <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser s TIN: </span>
+                      <span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser&apos;s TIN: </span>
                       <input type="text" value={data.purchaserTIN} onChange={(e) => update("purchaserTIN", e.target.value)} placeholder="TIN" style={inpStyle} />
                     </div>
                     <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser s Name: </span>
+                      <span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser&apos;s Name: </span>
                       <input type="text" value={data.purchaserName} onChange={(e) => update("purchaserName", e.target.value)} placeholder="Name" style={inpStyle} />
                     </div>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "4px" }}>
@@ -790,13 +790,13 @@ function ExtraSheetForm({
             <tbody>
               <tr>
                 <td style={cell({ width: "50%", verticalAlign: "top" })}>
-                  <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Suppliers TIN: </span><span style={readonlyStyle}>{data.supplierTIN}</span></div>
-                  <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier s Name: </span><span style={readonlyStyle}>{data.supplierName}</span></div>
+                  <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s TIN: </span><span style={readonlyStyle}>{data.supplierTIN}</span></div>
+                  <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s Name: </span><span style={readonlyStyle}>{data.supplierName}</span></div>
                   <div><span style={{ color: labelColor }}>Address: </span><span style={readonlyStyle}>{data.supplierAddress}</span></div>
                 </td>
                 <td style={cell({ verticalAlign: "top" })}>
-                  <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser s TIN: </span><input type="text" value={data.purchaserTIN} onChange={(e) => onChange({ ...data, purchaserTIN: e.target.value })} placeholder="TIN" style={inpStyle} /></div>
-                  <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser s Name: </span><input type="text" value={data.purchaserName} onChange={(e) => onChange({ ...data, purchaserName: e.target.value })} placeholder="Name" style={inpStyle} /></div>
+                  <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser&apos;s TIN: </span><input type="text" value={data.purchaserTIN} onChange={(e) => onChange({ ...data, purchaserTIN: e.target.value })} placeholder="TIN" style={inpStyle} /></div>
+                  <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}><span style={{ color: labelColor, whiteSpace: "nowrap" }}>Purchaser&apos;s Name: </span><input type="text" value={data.purchaserName} onChange={(e) => onChange({ ...data, purchaserName: e.target.value })} placeholder="Name" style={inpStyle} /></div>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "4px" }}><span style={{ color: labelColor, whiteSpace: "nowrap" }}>Address: </span><input type="text" value={data.purchaserAddress} onChange={(e) => onChange({ ...data, purchaserAddress: e.target.value })} placeholder="Full address" style={inpStyle} /></div>
                 </td>
               </tr>

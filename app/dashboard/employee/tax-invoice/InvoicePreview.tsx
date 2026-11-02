@@ -426,13 +426,13 @@ function ExtraSheetPages({
                       <tbody>
                         <tr>
                           <td style={cell({ width: "50%", verticalAlign: "top" })}>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Suppliers TIN: </span><strong>{data.supplierTIN}</strong></div>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier s Name: </span><strong>{data.supplierName}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s TIN: </span><strong>{data.supplierTIN}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s Name: </span><strong>{data.supplierName}</strong></div>
                             <div><span style={{ color: labelColor }}>Address: </span><strong>{data.supplierAddress}</strong></div>
                           </td>
                           <td style={cell({ verticalAlign: "top" })}>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser s TIN: </span><strong>{data.purchaserTIN}</strong></div>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser s Name: </span><strong>{data.purchaserName}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser&apos;s TIN: </span><strong>{data.purchaserTIN}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser&apos;s Name: </span><strong>{data.purchaserName}</strong></div>
                             <div><span style={{ color: labelColor }}>Address: </span><strong>{data.purchaserAddress}</strong></div>
                           </td>
                         </tr>
@@ -515,10 +515,25 @@ function ExtraSheetPages({
   );
 }
 
-export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
+/** A row with no description, quantity or price, even if a reference number was typed in. */
+const isBlankItem = (item: InvoiceData["lineItems"][number]) =>
+  !item.description?.trim() && !Number(item.quantity) && !Number(item.unitPrice) && !Number(item.amount);
+
+/** Blank rows, and extra sheets holding only blank rows, must not appear on the invoice. */
+const withoutBlankItems = (data: InvoiceData): InvoiceData => ({
+  ...data,
+  lineItems: data.lineItems.filter((item) => !isBlankItem(item)),
+  extraSheets: (data.extraSheets ?? [])
+    .map((sheet) => ({ ...sheet, lineItems: sheet.lineItems.filter((item) => !isBlankItem(item)) }))
+    .filter((sheet) => sheet.lineItems.length > 0),
+});
+
+export default function InvoicePreview({ data: rawData, autoGrowPages = false }: Props) {
   const [rowHeights, setRowHeights] = useState<Map<string, number>>(new Map());
   const [isMeasured, setIsMeasured] = useState(false);
   const measurementRefs = useRef<Map<string, HTMLTableRowElement | null>>(new Map());
+
+  const data = withoutBlankItems(rawData);
 
   const mainExVAT    = data.lineItems.reduce((s, i) => s + (i.amount !== undefined ? i.amount : i.quantity * i.unitPrice), 0);
   const extraSheets  = data.extraSheets ?? [];
@@ -595,8 +610,9 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
         <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "210mm", visibility: "hidden" }}>
           <ItemsTable
             items={[
-              ...data.lineItems,
-              ...extraSheets.flatMap(s => s.lineItems)
+              // Unfiltered: measurement runs once on mount, when a new invoice has only a blank row.
+              ...rawData.lineItems,
+              ...(rawData.extraSheets ?? []).flatMap(s => s.lineItems)
             ]}
             fillerCount={0}
             rowRefs={measurementRefs}
@@ -653,13 +669,13 @@ export default function InvoicePreview({ data, autoGrowPages = false }: Props) {
                       <tbody>
                         <tr>
                           <td style={cell({ width: "50%", verticalAlign: "top" })}>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Suppliers TIN: </span><strong>{data.supplierTIN}</strong></div>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier s Name: </span><strong>{data.supplierName}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s TIN: </span><strong>{data.supplierTIN}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Supplier&apos;s Name: </span><strong>{data.supplierName}</strong></div>
                             <div><span style={{ color: labelColor }}>Address: </span><strong>{data.supplierAddress}</strong></div>
                           </td>
                           <td style={cell({ verticalAlign: "top" })}>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser s TIN: </span><strong>{data.purchaserTIN}</strong></div>
-                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser s Name: </span><strong>{data.purchaserName}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser&apos;s TIN: </span><strong>{data.purchaserTIN}</strong></div>
+                            <div style={{ marginBottom: "2px" }}><span style={{ color: labelColor }}>Purchaser&apos;s Name: </span><strong>{data.purchaserName}</strong></div>
                             <div><span style={{ color: labelColor }}>Address: </span><strong>{data.purchaserAddress}</strong></div>
                           </td>
                         </tr>
