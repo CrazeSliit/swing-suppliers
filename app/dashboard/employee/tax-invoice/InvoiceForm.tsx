@@ -153,9 +153,21 @@ function FullLetterhead() {
 }
 
 
+/** Keep digits and a single decimal point (max 3 decimals), strip leading zeros. */
+function normalizeQty(raw: string): string {
+  const cleaned = raw.replace(/[^\d.]/g, "");
+  const parts = cleaned.split(".");
+  const intPart = (parts[0] ?? "").replace(/^0+(?=\d)/, "");
+  const decPart = parts.length > 1 ? parts.slice(1).join("").slice(0, 3) : undefined;
+  return decPart !== undefined ? `${intPart || "0"}.${decPart}` : intPart;
+}
+
 export default function InvoiceForm({ data, onChange }: Props) {
   const [rawPrices, setRawPrices] = useState<Record<string, string>>({});
   const [rawAmounts, setRawAmounts] = useState<Record<string, string>>({});
+  const [rawQtys, setRawQtys] = useState<Record<string, string>>({});
+  const commitRawQty = (id: string) =>
+    setRawQtys((prev) => { const n = { ...prev }; delete n[id]; return n; });
 
   const update = (field: keyof InvoiceData, value: string) =>
     onChange({ ...data, [field]: value });
@@ -187,8 +199,9 @@ export default function InvoiceForm({ data, onChange }: Props) {
   const normalizeLeadingZeros = (raw: string) => raw.replace(/^0+(?=\d)/, "");
 
   const handleQuantityChange = (id: string, raw: string) => {
-    const d = raw.replace(/\D/g, "");
-    const qty = parseInt(normalizeLeadingZeros(d) || "0", 10) || 0;
+    const norm = normalizeQty(raw);
+    setRawQtys((prev) => ({ ...prev, [id]: norm }));
+    const qty = parseFloat(norm || "0") || 0;
     onChange({
       ...data,
       lineItems: data.lineItems.map((item) =>
@@ -434,7 +447,7 @@ export default function InvoiceForm({ data, onChange }: Props) {
                     </td>
                     <td style={cell({ textAlign: "center", padding: "0 8px", height: "28px", verticalAlign: "top" })}>
                       <div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <input type="text" inputMode="numeric" value={item.quantity === 0 ? "" : String(item.quantity)} onChange={(e) => handleQuantityChange(item.id, e.target.value)} placeholder="1" style={{ ...inpStyle, textAlign: "center" }} />
+                        <input type="text" inputMode="decimal" value={rawQtys[item.id] ?? (item.quantity === 0 ? "" : String(item.quantity))} onChange={(e) => handleQuantityChange(item.id, e.target.value)} onBlur={() => commitRawQty(item.id)} placeholder="1" style={{ ...inpStyle, textAlign: "center" }} />
                       </div>
                     </td>
                     {data.useCommonPricing ? (
@@ -584,6 +597,9 @@ function ExtraSheetForm({
 }) {
   const [rawPrices, setRawPrices] = useState<Record<string, string>>({});
   const [rawAmounts, setRawAmounts] = useState<Record<string, string>>({});
+  const [rawQtys, setRawQtys] = useState<Record<string, string>>({});
+  const commitRawQty = (id: string) =>
+    setRawQtys((prev) => { const n = { ...prev }; delete n[id]; return n; });
 
   const updateSheet = (updated: ExtraSheet) => {
     onChange({
@@ -625,8 +641,9 @@ function ExtraSheetForm({
   const normalizeLeadingZeros = (raw: string) => raw.replace(/^0+(?=\d)/, "");
 
   const handleQty = (id: string, raw: string) => {
-    const d = raw.replace(/\D/g, "");
-    const qty = parseInt(normalizeLeadingZeros(d) || "0", 10) || 0;
+    const norm = normalizeQty(raw);
+    setRawQtys((prev) => ({ ...prev, [id]: norm }));
+    const qty = parseFloat(norm || "0") || 0;
     updateSheet({
       ...sheet,
       lineItems: sheet.lineItems.map((item) =>
@@ -851,7 +868,7 @@ function ExtraSheetForm({
                 <tr key={item.id}>
                   <td style={cell({ padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center" }}><input type="text" value={item.reference} onChange={(e) => updateItem(item.id, "reference", e.target.value)} placeholder="Ref" style={inpStyle} /></div></td>
                   <td style={cell({ padding: "4px 30px 4px 8px", verticalAlign: "top", position: "relative" })}><AutoTextarea value={item.description} onChange={(v) => updateItem(item.id, "description", v)} placeholder="Description" /><button onClick={() => removeItem(item.id)} disabled={sheet.lineItems.length === 1} style={{ ...floatingDeleteButtonStyle, opacity: sheet.lineItems.length === 1 ? 0.3 : 1, cursor: sheet.lineItems.length === 1 ? "not-allowed" : "pointer" }} title="Remove row">✕</button></td>
-                  <td style={cell({ textAlign: "center", padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}><input type="text" inputMode="numeric" value={item.quantity === 0 ? "" : String(item.quantity)} onChange={(e) => handleQty(item.id, e.target.value)} placeholder="1" style={{ ...inpStyle, textAlign: "center" }} /></div></td>
+                  <td style={cell({ textAlign: "center", padding: "0 8px", height: "28px", verticalAlign: "top" })}><div style={{ height: "28px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}><input type="text" inputMode="decimal" value={rawQtys[item.id] ?? (item.quantity === 0 ? "" : String(item.quantity))} onChange={(e) => handleQty(item.id, e.target.value)} onBlur={() => commitRawQty(item.id)} placeholder="1" style={{ ...inpStyle, textAlign: "center" }} /></div></td>
                   {data.useCommonPricing ? (
                     idx === 0 && (
                       <td rowSpan={sheet.lineItems.length} style={cell({ textAlign: "right", padding: "0 8px", verticalAlign: "middle" })}><input type="text" inputMode="decimal" value={commonUnitPriceDisplay} onChange={(e) => handleCommonPriceChange(e.target.value)} onBlur={commitCommonRawPrice} placeholder="0.00" style={{ ...inpStyle, textAlign: "right" }} /></td>
